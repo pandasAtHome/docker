@@ -1,0 +1,143 @@
+version: "3.9"
+
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      args:
+        NGINX_IMAGE_VERSION: ${NGINX_IMAGE_VERSION}
+    ports:
+      - ${NGINX_PORT}:80
+      - 8866:8866
+      - 8800:8800
+    volumes:
+      # 代码目录
+      - /data/nginx/html:/data/nginx/html
+      # nginx 默认配置
+      - ./nginx/${NGINX_IMAGE_VERSION}/nginx.conf:/etc/nginx/nginx.conf
+      # nginx 配置目录
+      - ./nginx/config:/etc/nginx/conf.d
+      # nginx 日志目录
+      - /data/nginx/logs:/var/log/nginx
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    restart: always
+
+  php-fpm:
+    container_name: php-fpm
+    build:
+      context: ./php
+      args:
+        PHP_IMAGE_VERSION: ${PHP_IMAGE_VERSION}
+    volumes:
+      # 代码目录（与 nginx 容器的代码目录保持一致）
+      - /data/nginx/html:/data/nginx/html
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    restart: always
+
+  python:
+    container_name: python
+    build:
+      context: ./python
+      args:
+        PYTHON_IMAGE_VERSION: ${PYTHON_IMAGE_VERSION}
+    tty: true
+    volumes:
+      # python 对外通讯接口目录
+      - ./python/network:/data/python/network
+      # python 代码目录
+      - /data/python:/data/python
+    environment:
+      FLASK_ENV: development
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    restart: always
+
+  mongo:
+    container_name: mongo
+    build:
+      context: ./mongo
+      args:
+        MONGO_IMAGE_VERSION: ${MONGO_IMAGE_VERSION}
+    ports:
+      - ${MONGO_PORT}:27017
+    tty: true
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INIT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INIT_PASSWORD}
+    volumes:
+      # 备份目录
+      - /data/mongo/backup:/data/mongo/backup
+      # 数据目录
+      - /data/mongo/data:/data/mongo/data
+      # 日志目录
+      - /data/mongo/logs:/data/mongo/logs
+      # 配置文件
+      - ./mongo/mongod.conf:/data/mongo/mongod.conf
+    command:
+      - /bin/bash
+      - -c
+      - mongod --config /data/mongo/mongod.conf
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    # restart: on-failure
+
+  mysql:
+    container_name: mysql
+    build:
+      context: ./mysql
+      args:
+        MYSQL_IMAGE_VERSION: ${MYSQL_IMAGE_VERSION}
+    ports:
+      - ${MYSQL_PORT}:3306
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # 备份目录
+      - /data/mysql/backup:/data/mysql/backup
+      # mysql 配置文件目录
+      - ./mysql/${MYSQL_IMAGE_VERSION}:/etc/mysql/mysql.conf.d
+      # mysql 数据存储目录
+      - /data/mysql/data:/var/lib/mysql
+      # mysql 日志目录
+      - /data/mysql/logs:/var/log/mysql
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    # restart: on-failure
+
+  redis:
+    container_name: redis
+    build:
+      context: ./redis
+      args:
+        REDIS_IMAGE_VERSION: ${REDIS_IMAGE_VERSION}
+    ports:
+      - ${REDIS_PORT}:6379
+    tty: true
+    volumes:
+      # 备份目录
+      - /data/redis/backup:/data/redis/backup
+      # redis 启动配置
+      - ./redis/redis.conf:/usr/local/etc/redis.conf
+      # redis 数据存储目录
+      - /data/redis/data:/usr/local/redis/data
+      # redis 日志目录
+      - /data/redis/logs/redis.log:/usr/local/redis/redis.log
+    networks:
+      - eyougame
+    # docker 重启后，容器自启动
+    # restart: on-failure
+
+networks:
+  eyougame:

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="473a1360-4992-47a1-b5c8-4043eaadefc6" name="panda">
+        <fileTransfer rootFolder="/data/docker" accessType="SFTP" host="146.56.199.107" port="22" sshConfigId="359d7f27-e565-4740-828a-f58bac5c45a4" sshConfig="ubuntu@146.56.199.107:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,9 @@
+flask
+google-ads
+IP2Location
+ipip-ipdb
+pandas
+pymongo
+pymysql
+redis
+environs
